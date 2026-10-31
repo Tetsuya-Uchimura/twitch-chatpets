@@ -1,0 +1,8 @@
+# Opt in when moving an existing native installation; stop its server first.
+services:
+  nib:
+    user: "${NIB_UID:-1000}:${NIB_GID:-1000}"
+    volumes:
+      - type: bind
+        source: ${NIB_DATA_DIR:-./data}
+        target: /app/data

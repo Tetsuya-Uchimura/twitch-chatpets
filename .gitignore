@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+coverage/
+data/
+*.log
+artifacts/
+playwright-report/
+test-results/
+reference_movie/

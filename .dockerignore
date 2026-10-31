@@ -1,0 +1,12 @@
+# Only source inputs required by the named build/test stages enter the context.
+**
+!Dockerfile
+!package.json
+!package-lock.json
+!tsconfig.json
+!src/
+!src/**
+!scripts/
+!scripts/**
+!tests/
+!tests/**

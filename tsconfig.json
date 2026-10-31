@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2023",
+      "DOM"
+    ]
+  },
+  "include": [
+    "src/shared/pulse-classifier.js",
+    "src/server/pulse.js",
+    "src/client/pulse-view.js",
+    "src/shared/action-variants.js",
+    "src/client/action-motion.js",
+    "src/client/evolution-sequence.js"
+  ]
+}

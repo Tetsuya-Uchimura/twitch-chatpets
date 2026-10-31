@@ -1,0 +1,50 @@
+name: Verify Nib
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ci-browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failures-${{ matrix.os }}
+          path: artifacts/
+          retention-days: 7
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Build and test the production image
+        run: docker build --target runtime -t chat-critters:ci .
+      - name: Check production HTTP, persistence and image contents
+        run: node scripts/container-smoke.mjs chat-critters:ci

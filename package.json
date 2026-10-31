@@ -1,0 +1,43 @@
+{
+  "name": "chat-critters",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server/index.js",
+    "dev": "node --watch src/server/index.js",
+    "test": "node --test tests/unit/*.test.js",
+    "check": "node scripts/check.mjs && npm run typecheck",
+    "verify": "npm run check && npm test && npm run build",
+    "typecheck": "tsc --noEmit",
+    "build": "node scripts/build.mjs",
+    "start:prod": "node src/server/index.js --production",
+    "test:ci-browser": "npm run test:visual-browser && npm run test:stream-jokes-browser && npm run test:minute-browser && npm run test:conversation-browser && npm run test:evolution-browser && npm run test:visibility",
+    "test:visual-browser": "node tests/browser/visual-question.mjs",
+    "test:stream-jokes-browser": "node tests/browser/stream-jokes.mjs",
+    "test:minute-browser": "node tests/browser/minute-sentiment.mjs",
+    "test:pulse-browser": "node tests/browser/pulse.mjs",
+    "test:personality-browser": "node tests/browser/personality.mjs",
+    "test:browser": "node tests/browser/browser.mjs",
+    "test:visibility": "node tests/browser/visibility.mjs",
+    "test:evolution-browser": "node tests/browser/nib-evolution.mjs",
+    "test:evolution-sequence": "node tests/browser/evolution-sequence.mjs",
+    "test:conversation-browser": "node tests/browser/conversation.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "openai": "^6.0.0",
+    "ws": "^8.18.3",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}
