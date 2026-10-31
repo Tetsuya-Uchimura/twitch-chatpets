@@ -2,6 +2,8 @@
 
 Start with [Submission overview](SUBMISSION.md), then [Architecture](ARCHITECTURE.md). The app can run as a zero-API demo; live Twitch/AI validation is recorded separately from mocked tests.
 
+The architecture guide includes [runtime data flow](diagrams/runtime.svg) and [deployment/storage boundaries](diagrams/deployment.svg). [Diagram sources and rendering](diagrams/README.md) are maintained alongside the SVGs.
+
 ## Read the implementation
 
 | Area | Entry points | What to review |

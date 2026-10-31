@@ -8,22 +8,11 @@ Node.js 22 / Express serves the dashboard and transparent OBS overlay. Twitch ar
 
 The Twitch connection verifies a matching WebSocket Pong every 20 seconds, with a 10-second response deadline. An unresponsive socket is invalidated immediately, marks AI disconnected and retries after 5 seconds. Channel join acknowledgement has a 15-second deadline. Socket identity guards discard delayed data/close/error events from prior connections. `/api/state.twitch` exposes phase, timestamps and receive/accept/drop counters without retaining message bodies or user identifiers. This prevents a half-open, long-lived connection from remaining labelled connected indefinitely. See the [ws heartbeat guidance](https://github.com/websockets/ws#how-to-detect-and-close-broken-connections).
 
-```text
-Twitch IRC / local demo
-        |
-ChatWindow: normalization, filtering, stable participant hash, rate/duplicate limits
-        |                   |                       |
-        v                   v                       v
-Game → interaction SSE   ChatPulse (60s)          Conversation candidates
-        |                   |                       |
-        |              NibEvolution          local demo / optional reply AI
-        |                   |                questions, polls, short memory
-        |                   |                anonymous relationship levels
-        +-------------------+-----------------------+
-                            |
-                     shared Canvas stage
-                     Nib + speech + event + charts
-```
+![Nib runtime architecture: Twitch intake fans out to local reactions, minute sentiment, conversation and scheduled visual jokes; validated AI output reaches the shared dashboard and OBS Canvas.](diagrams/runtime.svg)
+
+[Open full-size runtime diagram](diagrams/runtime.svg) · [Editable Mermaid source](diagrams/runtime.mmd)
+
+The shared AI-policy box represents in-process checks in the providers, `Store` and `ai-lease.js`; it is not an additional service. Local reactions do not wait for AI. Minute sentiment requires 5+ accepted messages from at least one viewer; a lower-activity minute restores Base Nib without a request. Ten-minute jokes enter the existing conversation queue, while selected viewer questions can request a preview on demand. Thumbnails are delayed stills, not live video. The labelled offline demo replaces external providers with local examples.
 
 ## Independent pipelines
 
@@ -59,6 +48,12 @@ Relationships store salted, channel-specific HMAC identities, points, cooldowns 
 
 ## Storage and controls
 
+![Nib deployment architecture: a loopback-only Docker service serves the dashboard and OBS, receives server-only environment credentials and writes settings, familiarity and review logs to a persistent data mount.](diagrams/deployment.svg)
+
+[Open full-size deployment diagram](diagrams/deployment.svg) · [Editable Mermaid source](diagrams/deployment.mmd)
+
+The deployment view shows the default Compose installation. `compose.host-data.yaml` replaces the named volume with the existing host `data/` folder. Native `npm start` runs the same server directly on loopback without the container boundary. HTTP control arrows represent local settings/requests; the app never posts viewer messages to Twitch.
+
 - `.env`: server-only credentials and startup mode/channel. HTTPS Twitch URLs normalize to channel logins.
 - `data/ai-state.json`: atomic settings, usage and cost reservations.
 - `data/relationships.json`: minimal relationship profiles and opt-out hashes.
@@ -77,4 +72,4 @@ The startup lock includes PID, hostname and local/container namespace. Another r
 
 GitHub Actions defines Windows/Linux verification and a container smoke job, without credentials. The image uses a digest-pinned Node.js 22 base and separate build/production dependency stages. Only production dependencies, server modules, necessary shared data modules and built assets reach the non-root runtime. An allowlist build context excludes credentials, saved data and local artifacts. See [operations](guides/OPERATIONS.md).
 
-The current 184 unit/HTTP tests and production checks/build passed on Windows and Docker Linux. The six browser suites cover visual questions/history, stream jokes, minute sentiment, conversation, evolution and visibility; their current Windows results and the separate earlier Linux browser results are recorded in the operations guide. Container liveness, recreation persistence, active-ledger exclusion, image contents and origin/Host controls also passed. GitHub-hosted workflow execution has not been performed. Separate live checks on 2026-10-30–31 confirmed actual Twitch reception, a viewer-triggered jump, contextual model replies, questions/polls with two real accounts, and AI responses grounded in the calculated tie results. The operator confirmed a reply bubble in OBS; live event-card rendering was checked in the OBS overlay browser. These are bounded live examples rather than a broad quality or latency benchmark; see [live validation](validation/LIVE_VALIDATION.md).
+The current 184 unit/HTTP tests and production checks/build passed on Windows and Docker Linux. The six browser suites cover visual questions/history, stream jokes, minute sentiment, conversation, evolution and visibility. [GitHub Actions run for revision d837e5a](https://github.com/Tetsuya-Uchimura/twitch-chatpets/actions/runs/41163888806) passed all three jobs: Windows verification, Linux verification and container smoke. Both hosted verification jobs ran all six browser suites. Container liveness, recreation persistence, active-ledger exclusion, image contents and origin/Host controls also passed locally; see the [operations guide](guides/OPERATIONS.md). Separate live checks on 2026-10-30–31 confirmed actual Twitch reception, a viewer-triggered jump, contextual model replies, questions/polls with two real accounts, and AI responses grounded in the calculated tie results. The operator confirmed a reply bubble in OBS; live event-card rendering was checked in the OBS overlay browser. These are bounded live examples rather than a broad quality or latency benchmark; see [live validation](validation/LIVE_VALIDATION.md).

@@ -2,6 +2,10 @@
 
 Nib is an original pixel-art character that lives and evolves alongside your Twitch chat. Beyond running to, eating and jumping over comments, Nib replies to chat topics and carries the results of questions and polls into its next reaction. It sits transparently in a corner of your OBS scene.
 
+![Nib architecture: Twitch comments drive local reactions, minute emotion analysis, conversation and image-backed jokes; a shared Canvas renders the dashboard and transparent OBS overlay.](docs/diagrams/runtime.svg)
+
+[Architecture diagrams and explanation](docs/ARCHITECTURE.md) · [Docker and storage diagram](docs/diagrams/deployment.svg)
+
 ## Where judges and reviewers should start
 
 1. [Submission overview](docs/SUBMISSION.md): goals and technical highlights.

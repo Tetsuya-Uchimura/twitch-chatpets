@@ -1,0 +1,35 @@
+flowchart TB
+  accTitle: Nib deployment and persistent storage
+  accDescr: A single non-root Docker process serves the local dashboard and OBS through host loopback, keeps credentials server-side, and writes its ledger, anonymous familiarity and six-hour response history to a persistent data mount.
+  Twitch["Twitch services<br/>IRC / OAuth / Helix / thumbnails"]
+  OpenAI["OpenAI API<br/>Text + image input"]
+
+  subgraph PC["Streamer PC · single local installation"]
+    Browser["Browser dashboard<br/>http://127.0.0.1:3000/"]
+    OBS["OBS Browser Source<br/>Same host, /?overlay=1"]
+    Port["Host loopback port 3000<br/>HTTP / local controls / SSE"]
+    Env["Local .env<br/>Keys + startup configuration<br/>Excluded from Git and image"]
+
+    subgraph CONTAINER["Docker · non-root / read-only root"]
+      Server["Node.js 22 + Express<br/>Server + bundled client assets<br/>Localhost Host / Origin checks"]
+    end
+
+    Data[("Persistent data mount<br/>ai-state.json · relationships.json<br/>conversation-log.json · server.lock")]
+    Browser <-->|HTTP / SSE| Port
+    OBS <-->|HTTP / SSE| Port
+    Port <--> Server
+    Env -->|server environment| Server
+    Server <-->|one writer / atomic JSON| Data
+  end
+
+  Twitch -->|receive chat / fetch still| Server
+  Server <-->|server-side requests| OpenAI
+
+  classDef external fill:#eaf0fb,stroke:#5277a1,color:#1d334f
+  classDef runtime fill:#edf5e5,stroke:#658451,color:#243c2b
+  classDef private fill:#fff4df,stroke:#aa8548,color:#5a4326
+  classDef client fill:#e5f4ee,stroke:#4d8c75,color:#214b3b
+  class Twitch,OpenAI external
+  class Server,Port runtime
+  class Env,Data private
+  class Browser,OBS client

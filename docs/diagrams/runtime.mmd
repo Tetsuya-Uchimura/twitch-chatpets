@@ -1,0 +1,45 @@
+flowchart TB
+  accTitle: Nib runtime data flow
+  accDescr: Twitch comments feed local actions, minute sentiment, conversation and ten-minute joke candidates. Server-only AI and thumbnail paths produce state and speech for the shared dashboard and transparent OBS Canvas.
+  Chat["Twitch chat<br/>Viewer comments"]
+  API["Twitch API + image CDN<br/>Server-only authentication"]
+  AI["OpenAI Responses API<br/>Text + image input"]
+
+  subgraph SERVER["Node.js server · src/server"]
+    Intake["Chat intake<br/>Receive-only IRC<br/>Sanitize / rate-limit"]
+    Actions["Local actions<br/>Immediate movement"]
+    Emotion["Minute sentiment<br/>60-second chat batch<br/>Scores → Nib form"]
+    Talk["Conversation<br/>Replies / questions / polls"]
+    Jokes["Visual jokes<br/>10-minute chat window"]
+    Frame["TwitchFrame<br/>Delayed stream thumbnail"]
+    Policy["Shared AI controls<br/>Budget / rate / concurrency<br/>Validate structured output"]
+    SSE["Express + SSE<br/>State / actions / speech"]
+    Intake --> Actions
+    Intake --> Emotion
+    Intake --> Talk
+    Intake --> Jokes
+    Jokes -->|enqueue image + chat| Talk
+    Frame -->|selected questions| Talk
+    Frame -->|scheduled joke| Jokes
+    Emotion <-->|minute scores| Policy
+    Talk <-->|reply + emote| Policy
+    Actions --> SSE
+    Emotion -->|scores + form| SSE
+    Talk -->|speech + poll results| SSE
+  end
+
+  Chat --> Intake
+  API --> Frame
+  Policy <-->|bounded request / validated response| AI
+  SSE --> Canvas["Shared Canvas renderer<br/>Actions / evolution / speech"]
+  Canvas --> Dashboard["Streamer dashboard<br/>Preview and local controls"]
+  Canvas --> OBS["OBS Browser Source<br/>Transparent Nib overlay"]
+
+  classDef external fill:#eaf0fb,stroke:#5277a1,color:#1d334f
+  classDef local fill:#edf5e5,stroke:#658451,color:#243c2b
+  classDef ai fill:#f1eafb,stroke:#8c6ab0,color:#493361
+  classDef output fill:#e5f4ee,stroke:#4d8c75,color:#214b3b
+  class Chat,API external
+  class AI,Policy ai
+  class Intake,Actions,Emotion,Talk,Jokes,Frame,SSE local
+  class Canvas,Dashboard,OBS output
